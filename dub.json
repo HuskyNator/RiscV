@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"Paul"
+	],
+	"copyright": "Copyright © 2023, Paul",
+	"description": "A RISC-V RV32I Simulator.",
+	"license": "proprietary",
+	"name": "riscv"
+}

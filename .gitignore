@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/riscv
+riscv.so
+riscv.dylib
+riscv.dll
+riscv.a
+riscv.lib
+riscv-test-*
+*.exe
+*.o
+*.obj
+*.lst
