@@ -3,7 +3,6 @@ module token;
 struct Token {
 	enum Type {
 		SYMBOL,
-		INSTRUCTION,
 		COMMENT,
 		DOT,
 		COMMA,
