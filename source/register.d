@@ -1,6 +1,12 @@
 module register;
 import std.conv : to;
 
+class RegNameException : Exception {
+	this(string msg) {
+		super(msg);
+	}
+}
+
 // Struct to serve as enum
 struct Reg {
 	ubyte val;
@@ -8,15 +14,16 @@ struct Reg {
 
 	mixin(_ctReg()); // Enum members
 
-	this(string name) {
+	this(string name) { // TODO switch?
+		// string s;
 		static foreach (reg; __traits(allMembers, Reg)) {
-			static if (reg != "val" && is(typeof("Reg." ~ reg) == ubyte))
+			static if (reg != "val" && is(typeof(mixin("Reg." ~ reg)) == ubyte))
 				if (name == reg) {
 					this.val = mixin("Reg." ~ reg);
 					return;
 				}
 		}
-		assert(0, "Register name invalid: " ~ name);
+		throw new RegNameException("Register name invalid: " ~ name);
 	}
 
 	// Aliases
