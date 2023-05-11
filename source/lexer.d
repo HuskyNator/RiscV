@@ -14,13 +14,18 @@ struct Lexer {
 
 	@disable this();
 
-	static Token[] lex(string fileName) {
-		return Lexer(fileName).lex();
+	static Token[] lexFile(string fileName) {
+		string text = readText(fileName); // Validates utf as well
+		return Lexer(text).lex();
+	}
+
+	static Token[] lex(string text) {
+		return Lexer(text).lex();
 	}
 
 private:
-	this(string fileName) {
-		this.text = readText(fileName); // Validates utf as well
+	this(string text) {
+		this.text = text;
 		enforce(text.length > 0, "Lexer needs non-empty text");
 		c = text[0];
 	}
@@ -71,55 +76,53 @@ private:
 		with (Token.Type) switch (c) {
 			// case '\'':
 			// 	return charToken();
-		case '\"':
-			return stringToken();
-		case '#':
-			return comment();
-		case ',':
-			return cToken(COMMA);
-		case '.':
-			return cToken(DOT);
-		case ':':
-			return cToken(COLON);
-		case '\n':
-			return cToken(NEWLINE);
-		case '(':
-			return cToken(OPENBRACKET);
-		case ')':
-			return cToken(CLOSEBRACKET);
-		case '%':
-			return cToken(PERCENT);
-		case '+':
-			return cToken(PLUS);
-		case '-':
-			return cToken(MINUS);
-		case '*':
-			return cToken(STAR);
-		case '/':
-			return cToken(SLASH);
-		case '~':
-			return cToken(TILDE);
-		case '>':
-			return tryFollow(['>', '='], [SHIFT_RIGHT, MORE_EQUAL], MORE);
-		case '<':
-			return tryFollow(['<', '>', '='], [
-					SHIFT_LEFT, NOT_EQUAL2, LESS_EQUAL
-				], LESS);
-		case '|':
-			return tryFollow(['|'], [LOGIC_OR], OR);
-		case '&':
-			return tryFollow(['&'], [LOGIC_AND], AND);
-		case '^':
-			return cToken(CARET);
-		case '!':
-			return tryFollow(['='], [NOT_EQUAL], AND);
-		case '=':
-			return tryFollow(['='], [EQUAL], EQUAL_SIGN);
-		default:
-			if (isDigit(c))
-				return number();
-			else
-				return symbol();
+			case '\"':
+				return stringToken();
+			case '#':
+				return comment();
+			case ',':
+				return cToken(COMMA);
+			case '.':
+				return cToken(DOT);
+			case ':':
+				return cToken(COLON);
+			case '\n':
+				return cToken(NEWLINE);
+			case '(':
+				return cToken(OPENBRACKET);
+			case ')':
+				return cToken(CLOSEBRACKET);
+			case '%':
+				return cToken(PERCENT);
+			case '+':
+				return cToken(PLUS);
+			case '-':
+				return cToken(MINUS);
+			case '*':
+				return cToken(STAR);
+			case '/':
+				return cToken(SLASH);
+			case '~':
+				return cToken(TILDE);
+			case '>':
+				return tryFollow(['>', '='], [SHIFT_RIGHT, MORE_EQUAL], MORE);
+			case '<':
+				return tryFollow(['<', '>', '='], [SHIFT_LEFT, NOT_EQUAL2, LESS_EQUAL], LESS);
+			case '|':
+				return tryFollow(['|'], [LOGIC_OR], OR);
+			case '&':
+				return tryFollow(['&'], [LOGIC_AND], AND);
+			case '^':
+				return cToken(CARET);
+			case '!':
+				return tryFollow(['='], [NOT_EQUAL], AND);
+			case '=':
+				return tryFollow(['='], [EQUAL], EQUAL_SIGN);
+			default:
+				if (isDigit(c))
+					return number();
+				else
+					return symbol();
 		}
 	}
 
@@ -139,10 +142,8 @@ private:
 		immutable ulong pOld = p;
 
 		while (delimited || c != '\"') {
-			enforce(p < text.length, "Lexer unexpectedly reached EOF while lexing string at position: " ~ p
-					.to!string);
-			enforce(c != '\n', "Lexer found unexpected \'\\n\' while lexing string at position: " ~ p
-					.to!string);
+			enforce(p < text.length, "Lexer unexpectedly reached EOF while lexing string at position: " ~ p.to!string);
+			enforce(c != '\n', "Lexer found unexpected \'\\n\' while lexing string at position: " ~ p.to!string);
 			delimited = c == '\\';
 			nextChar();
 		}
@@ -190,12 +191,11 @@ private:
 		immutable ulong pOld = p;
 		while (isAlphaNum(c))
 			nextChar();
-		return Token(Token.Type.Number, text[pOld .. p].idup);
+		return Token(Token.Type.NUMBER, text[pOld .. p].idup);
 	}
 
 	Token symbol() {
-		enforce(isSymbolStart(c), "Lexer found unexpected char \'" ~ c ~ "\' at position: " ~ p
-				.to!string);
+		enforce(isSymbolStart(c), "Lexer found unexpected char \'" ~ c ~ "\' at position: " ~ p.to!string);
 		immutable ulong pOld = p;
 		while (isSymbolChar(c))
 			nextChar();

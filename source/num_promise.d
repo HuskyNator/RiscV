@@ -1,6 +1,6 @@
 module num_promise;
 
-struct NumPromise {
+class NumPromise {
 	enum Type {
 		MODIFIER, // %lo(symbol)
 		LABEL, // l: -> l
@@ -11,7 +11,7 @@ struct NumPromise {
 
 	Type type;
 	union {
-		Modifier modifier;
+		// Modifier modifier; TODO
 		string label;
 		int literal; // 32 bits
 		PrefixOp prefix;
@@ -19,13 +19,49 @@ struct NumPromise {
 	}
 
 	this(int value) {
-		this.type = LITERAL;
+		this.type = Type.LITERAL;
 		this.literal = value;
 	}
 
 	this(PrefixOp po) {
-		this.type = PREFIXOP;
+		this.type = Type.PREFIXOP;
 		this.prefix = po;
+	}
+
+	this(InfixOp io) {
+		this.type = Type.INFIXOP;
+		this.infix = io;
+	}
+
+	bool opEquals(R)(const R other) const {
+		if (this.type != other.type)
+			return false;
+		if (this.type == Type.LABEL)
+			return this.label == other.label;
+		else if (this.type == Type.LITERAL)
+			return this.literal == other.literal;
+		else if (this.type == Type.PREFIXOP)
+			return this.prefix == other.prefix;
+		else if (this.type == Type.INFIXOP)
+			return this.infix == other.infix;
+		else
+			return false;
+	}
+
+	override string toString() const pure nothrow {
+		import std.conv : to;
+
+		if (this.type == Type.LABEL)
+			return this.label;
+		else if (this.type == Type.LITERAL)
+			return to!string(this.literal);
+		else if (this.type == Type.PREFIXOP)
+			return this.prefix.toString;
+		else if (this.type == Type.INFIXOP)
+			return this.infix.toString;
+		else if (this.type == Type.MODIFIER)
+			return "Modifier"; // TODO
+		assert(0, "Invalid NumPromise type");
 	}
 }
 
@@ -36,7 +72,20 @@ struct PrefixOp {
 	}
 
 	Type type;
-	Numpromise arg;
+	NumPromise arg;
+
+	bool opEquals(R)(const R other) const {
+		return this.type == other.type && this.arg == other.arg;
+	}
+
+	string toString() const pure nothrow {
+		import std.conv : to;
+
+		try
+			return type.to!string ~ '(' ~ arg.toString ~ ')';
+		catch (Exception e)
+			return "Invalid PrefixOp";
+	}
 }
 
 struct InfixOp {
@@ -74,4 +123,17 @@ struct InfixOp {
 	Type type;
 	NumPromise argL;
 	NumPromise argR;
+
+	bool opEquals(R)(const R other) const {
+		return this.type == other.type && this.argL == other.argL && this.argR == other.argR;
+	}
+
+	string toString() const pure nothrow {
+		import std.conv : to;
+
+		try
+			return type.to!string ~ '(' ~ argL.toString ~ ", " ~ argR.toString ~ ')';
+		catch (Exception e)
+			return "Invalid InfixOp";
+	}
 }

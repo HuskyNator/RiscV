@@ -1,8 +1,9 @@
 module asm_token;
-import std.string : splitLines;
+import num_promise;
+import register;
 import std.array : split;
 import std.conv : to;
-import register;
+import std.string : splitLines;
 
 struct AsmToken {
 	enum Type {
@@ -176,8 +177,8 @@ struct Directive {
 
 	Type type;
 	union {
-		long number;
-		long[] numbers;
+		NumPromise number;
+		NumPromise[] numbers;
 		string symbol;
 		string[] strings;
 	}

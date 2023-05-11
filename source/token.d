@@ -43,4 +43,13 @@ struct Token {
 
 	Type type;
 	string content;
+
+	string toString() const @safe pure nothrow {
+		import std.conv : to;
+
+		try
+			return type.to!string ~ "(" ~ content ~ ")";
+		catch (Exception e)
+			return "Invalid token";
+	}
 }
